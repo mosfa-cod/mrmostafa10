@@ -1,13 +1,13 @@
-// ===== main.js =====
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+ // main.js
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy } 
+  from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBMvIzV131KdAjuHS8B6tCUBSmaGgLoLUY",
-  authDomain: "mostafa-academy-2645a.firebaseapp.com",
-  projectId: "mostafa-academy-2645a",
-  storageBucket: "mostafa-academy-2645a.firebasestorage.app",
+  apiKey: "AIzaSyBMvIzV131KdAjuHS8B6tCUBsmaGgloLUY",
+  authDomain: "mostafa-acdemy-2645a.firebaseapp.com",
+  projectId: "mostafa-acdemy-2645a",
+  storageBucket: "mostafa-acdemy-2645a.firebasestorage.app",
   messagingSenderId: "371101699494",
   appId: "1:371101699494:web:3e79c870941afef5179367"
 };

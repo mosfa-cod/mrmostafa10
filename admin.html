@@ -1,166 +1,126 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>لوحة التحكم — الأستاذ مصطفى عبد العال دحروج</title>
-  <style>
-    body{font-family:'Tahoma',sans-serif;background:#f4f4f9;margin:0;padding:20px;color:#222}
-    .box{max-width:760px;margin:auto;background:#fff;padding:24px;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
-    h2{color:#7c3aed;border-bottom:2px solid #eee;padding-bottom:8px}
-    input,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px;box-sizing:border-box}
-    button{background:#7c3aed;color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;margin:4px 0}
-    button.danger{background:#dc2626}
-    .item{border:1px solid #eee;border-radius:8px;padding:10px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
-    #login{max-width:360px;margin:60px auto}
-    .hidden{display:none}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحكم - الأستاذ مصطفى</title>
+    <!-- استدعاء مكتبات الفايربيس الأساسية -->
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <script src="https://gstatic.com"></script>
+    <!-- استدعاء ملف الإعدادات الخاص بك -->
+    <script src="firebase-config.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .login-card, .admin-panel { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
+        .admin-panel { max-width: 800px; display: none; text-align: right; }
+        h2 { color: #6366f1; margin-bottom: 25px; text-align: center; }
+        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 12px; background-color: #6366f1; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #4f46e5; }
+        .section-box { border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 25px; background: #fafafa; }
+        .logout-btn { background-color: #ef4444; margin-top: 20px; }
+        .logout-btn:hover { background-color: #dc2626; }
+    </style>
 </head>
 <body>
 
-  <!-- شاشة الدخول -->
-  <div id="login" class="box">
-    <h2>دخول المسؤول</h2>
-    <input id="email" type="email" placeholder="البريد الإلكتروني">
-    <input id="password" type="password" placeholder="كلمة المرور">
-    <button id="loginBtn">تسجيل الدخول</button>
-    <p id="loginMsg" style="color:#dc2626"></p>
-  </div>
-
-  <!-- لوحة التحكم -->
-  <div id="panel" class="hidden">
-    <div class="box">
-      <button id="logoutBtn" class="danger">تسجيل الخروج</button>
+    <!-- أولاً: نموذج تسجيل الدخول للمسؤول -->
+    <div class="login-card" id="loginSection">
+        <h2>دخول المسؤول</h2>
+        <input type="email" id="emailInput" placeholder="البريد الإلكتروني">
+        <input type="password" id="passwordInput" placeholder="كلمة المرور">
+        <button onclick="loginAdmin()">تسجيل الدخول</button>
     </div>
 
-    <!-- المواد -->
-    <div class="box">
-      <h2>المواد التعليمية</h2>
-      <input id="s_id" type="hidden">
-      <input id="s_title" placeholder="عنوان المادة">
-      <input id="s_icon" placeholder="الأيقونة (إيموجي مثل 📖)">
-      <textarea id="s_desc" placeholder="وصف قصير"><textarea name="" id=""></textarea>
-      <input id="s_lessons" type="number" placeholder="عدد الدروس">
-      <input id="s_stories" type="number" placeholder="عدد القصص">
-      <input id="s_order" type="number" placeholder="الترتيب">
-      <button id="s_save">حفظ المادة</button>
-      <div id="subjectsList"></div>
+    <!-- ثانياً: لوحة التحكم (تظهر بعد تسجيل الدخول بنجاح) -->
+    <div class="admin-panel" id="adminSection">
+        <h2>لوحة تحكم الأستاذ مصطفى 🛠️</h2>
+        
+        <!-- قسم إضافة مادة تعليمية جديدة -->
+        <div class="section-box">
+            <h3>إضافة مادة تعليمية جديدة</h3>
+            <input type="text" id="subjectTitle" placeholder="اسم المادة (مثال: اللغة العربية)">
+            <textarea id="subjectDesc" rows="3" placeholder="وصف مختصر للمادة"></textarea>
+            <input type="text" id="subjectIcon" placeholder="أيقونة المادة (مثال: 📚 أو 🔢)">
+            <button onclick="addSubject()">إضافة المادة للموقع</button>
+        </div>
+
+        <!-- قسم تحديث تحدي اليوم -->
+        <div class="section-box">
+            <h3>تحديث تحدي اليوم</h3>
+            <input type="text" id="challengeTitle" placeholder="عنوان التحدي">
+            <textarea id="challengeDesc" rows="3" placeholder="تفاصيل التحدي المطلوب من الطلاب"></textarea>
+            <button onclick="updateChallenge()">تحديث التحدي الآن</button>
+        </div>
+
+        <button class="logout-btn" onclick="logoutAdmin()">تسجيل الخروج</button>
     </div>
 
-    <!-- تحدي اليوم -->
-    <div class="box">
-      <h2>تحدي اليوم</h2>
-      <input id="c_title" placeholder="عنوان التحدي">
-      <textarea id="c_desc" placeholder="نص التحدي">textarea>
-      <input id="c_points" type="number" placeholder="النقاط">
-      <button id="c_save">تحديث التحدي</button>
-    </div>
+    <script>
+        // دالة تسجيل الدخول باستخدام Firebase Auth
+        function loginAdmin() {
+            const email = document.getElementById('emailInput').value;
+            const password = document.getElementById('passwordInput').value;
+            
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    alert('تم تسجيل الدخول بنجاح!');
+                })
+                .catch((error) => {
+                    alert('خطأ في البيانات: ' + error.message);
+                });
+        }
 
-    <!-- الآراء -->
-    <div class="box">
-      <h2>آراء أولياء الأمور</h2>
-      <input id="t_id" type="hidden">
-      <input id="t_name" placeholder="اسم الشخص">
-      <input id="t_role" placeholder="صلة القرابة / الوظيفة">
-      <textarea id="t_text" placeholder="نص الرأي">textarea>
-      <input id="t_rating" type="number" min="1" max="5" placeholder="التقييم (1-5)">
-      <input id="t_color" placeholder="لون الدائرة (مثل #7c3aed)">
-      <input id="t_order" type="number" placeholder="الترتيب">
-      <button id="t_save">حفظ الرأي</button>
-      <div id="testList"></div>
-    </div>
-  </div>
+        // مراقبة حالة المستخدم (هل هو مسجل دخول أم لا)
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('adminSection').style.display = 'block';
+            } else {
+                document.getElementById('loginSection').style.display = 'block';
+                document.getElementById('adminSection').style.display = 'none';
+            }
+        });
 
-  <script type="module">
-    import { db, auth } from "./firebase-config.js";
-    import { signInWithEmailAndPassword, signOut, onAuthStateChanged }
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc }
-      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // دالة تسجيل الخروج
+        function logoutAdmin() {
+            firebase.auth().signOut();
+        }
 
-    const $ = (id) => document.getElementById(id);
+        // دالة إضافة مادة إلى الفايربيس
+        function addSubject() {
+            const title = document.getElementById('subjectTitle').value;
+            const desc = document.getElementById('subjectDesc').value;
+            const icon = document.getElementById('subjectIcon').value;
 
-    // ---- المصادقة ----
-    $("loginBtn").onclick = async () => {
-      try {
-        await signInWithEmailAndPassword(auth, $("email").value, $("password").value);
-      } catch(e){ $("loginMsg").textContent = "بيانات الدخول غير صحيحة"; }
-    };
-    $("logoutBtn").onclick = () => signOut(auth);
+            if(!title || !desc) return alert('برجاء ملء الحقول المطلوبة');
 
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        $("login").classList.add("hidden");
-        $("panel").classList.remove("hidden");
-        loadSubjects(); loadTests();
-      } else {
-        $("login").classList.remove("hidden");
-        $("panel").classList.add("hidden");
-      }
-    });
+            firebase.database().ref('content/subjects').push({
+                title: title,
+                desc: desc,
+                icon: icon || "📖"
+            }).then(() => {
+                alert('تم إضافة المادة بنجاح للموقع الحقيقي!');
+                document.getElementById('subjectTitle').value = '';
+                document.getElementById('subjectDesc').value = '';
+            });
+        }
 
-    // ---- المواد ----
-    async function loadSubjects(){
-      const snap = await getDocs(collection(db,"subjects"));
-      $("subjectsList").innerHTML="";
-      snap.forEach(d=>{
-        const s=d.data();
-        $("subjectsList").innerHTML += `<div class="item"><span>${s.icon||""} ${s.title}</span>
-          <span><button onclick="window.editS('${d.id}', ${JSON.stringify(s).replace(/"/g,'&quot;')})">تعديل</button>
-          <button class="danger" onclick="window.delS('${d.id}')">حذف</button></span></div>`;
-      });
-    }
-    $("s_save").onclick = async () => {
-      const data = {
-        title:$("s_title").value, icon:$("s_icon").value, description:$("s_desc").value,
-        lessonsCount:Number($("s_lessons").value||0), storiesCount:Number($("s_stories").value||0),
-        order:Number($("s_order").value||0)
-      };
-      if($("s_id").value){ await updateDoc(doc(db,"subjects",$("s_id").value), data); }
-      else { await addDoc(collection(db,"subjects"), data); }
-      ["s_id","s_title","s_icon","s_desc","s_lessons","s_stories","s_order"].forEach(i=>$(i).value="");
-      loadSubjects();
-    };
-    window.editS = (id,s)=>{ $("s_id").value=id; $("s_title").value=s.title||""; $("s_icon").value=s.icon||"";
-      $("s_desc").value=s.description||""; $("s_lessons").value=s.lessonsCount||0;
-      $("s_stories").value=s.storiesCount||0; $("s_order").value=s.order||0; };
-    window.delS = async (id)=>{ if(confirm("حذف المادة؟")){ await deleteDoc(doc(db,"subjects",id)); loadSubjects(); } };
+        // دالة تحديث تحدي اليوم في الفايربيس
+        function updateChallenge() {
+            const title = document.getElementById('challengeTitle').value;
+            const desc = document.getElementById('challengeDesc').value;
 
-    // ---- تحدي اليوم ----
-    $("c_save").onclick = async () => {
-      await setDoc(doc(db,"challenges","today"), {
-        title:$("c_title").value, description:$("c_desc").value,
-        points:Number($("c_points").value||0), active:true
-      });
-      alert("تم تحديث التحدي");
-    };
+            if(!title || !desc) return alert('برجاء ملء الحقول المطلوبة');
 
-    // ---- الآراء ----
-    async function loadTests(){
-      const snap = await getDocs(collection(db,"testimonials"));
-      $("testList").innerHTML="";
-      snap.forEach(d=>{
-        const t=d.data();
-        $("testList").innerHTML += `<div class="item"><span>${t.name} — ${t.role||""}</span>
-          <span><button onclick="window.editT('${d.id}', ${JSON.stringify(t).replace(/"/g,'&quot;')})">تعديل</button>
-          <button class="danger" onclick="window.delT('${d.id}')">حذف</button></span></div>`;
-      });
-    }
-    $("t_save").onclick = async () => {
-      const data = {
-        name:$("t_name").value, role:$("t_role").value, text:$("t_text").value,
-        rating:Number($("t_rating").value||5), avatarColor:$("t_color").value||"#7c3aed",
-        order:Number($("t_order").value||0)
-      };
-      if($("t_id").value){ await updateDoc(doc(db,"testimonials",$("t_id").value), data); }
-      else { await addDoc(collection(db,"testimonials"), data); }
-      ["t_id","t_name","t_role","t_text","t_rating","t_color","t_order"].forEach(i=>$(i).value="");
-      loadTests();
-    };
-    window.editT = (id,t)=>{ $("t_id").value=id; $("t_name").value=t.name||""; $("t_role").value=t.role||"";
-      $("t_text").value=t.text||""; $("t_rating").value=t.rating||5; $("t_color").value=t.avatarColor||"";
-      $("t_order").value=t.order||0; };
-    window.delT = async (id)=>{ if(confirm("حذف الرأي؟")){ await deleteDoc(doc(db,"testimonials",id)); loadTests(); } };
-  </script>
+            firebase.database().ref('content/challenge').set({
+                title: title,
+                desc: desc
+            }).then(() => {
+                alert('تم تحديث تحدي اليوم بنجاح!');
+            });
+        }
+    </script>
 </body>
 </html>

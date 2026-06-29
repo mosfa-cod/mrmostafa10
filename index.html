@@ -29,6 +29,16 @@
     .testimonial-author{display:flex;align-items:center;gap:12px;margin-top:14px}
     .author-avatar{width:46px;height:46px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:20px}
     .author-info{display:flex;flex-direction:column}.author-name{font-weight:bold}.author-role{font-size:13px;opacity:.7}
+   /* إضافة حركية ناعمة لجميع العناصر */
+* {
+    transition: background-color 0.4s ease, color 0.4s ease, transform 0.2s ease;
+}
+
+/* تحسين شكل الأيقونات والبطاقات */
+.subject-card, .testimonial-card {
+    border: 1px solid rgba(0,0,0,0.05);
+    backdrop-filter: blur(10px); /* لمسة Glassmorphism بسيطة */
+}
   </style>
 </head>
 <body>

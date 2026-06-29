@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة تحكم الأستاذ مصطفى</title>
+    <title>لوحة تحكم المسؤول</title>
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f6f9; }
         .card { background: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
@@ -21,14 +21,16 @@
 
     <div class="card" id="adminSection" style="display: none;">
         <h2>لوحة التحكم 🛠️</h2>
+        <!-- إضافة مادة -->
         <input type="text" id="subjectTitle" placeholder="اسم المادة">
         <textarea id="subjectDesc" placeholder="وصف المادة"></textarea>
-        <input type="text" id="subjectIcon" placeholder="الأيقونة">
         <button onclick="addSubject()">حفظ المادة</button>
 
         <div class="danger-zone">
-            <h3 style="color: #ef4444; margin-top: 0;">تنظيف الموقع</h3>
-            <button id="clearBtn" style="background-color: #dc2626;">مسح كل المواد الحالية 🗑️</button>
+            <h3 style="color: #ef4444; margin-top: 0;">منطقة التنظيف</h3>
+            <button onclick="clearCollection('subjects')" style="background-color: #dc2626; margin-bottom: 5px;">مسح المواد 🗑️</button>
+            <button onclick="clearCollection('challenges')" style="background-color: #b91c1c; margin-bottom: 5px;">مسح التحديات 🗑️</button>
+            <button onclick="clearCollection('testimonials')" style="background-color: #991b1b;">مسح الآراء 🗑️</button>
         </div>
 
         <button style="background: #6b7280; margin-top: 10px;" onclick="logoutAdmin()">تسجيل الخروج</button>
@@ -39,42 +41,38 @@
         import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
         import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-        // التحكم في ظهور الأقسام
+        // تسجيل الدخول
+        window.loginAdmin = () => {
+            const email = document.getElementById('emailInput').value;
+            const pass = document.getElementById('passwordInput').value;
+            signInWithEmailAndPassword(auth, email, pass)
+                .catch(e => alert("خطأ في الدخول: " + e.message));
+        };
+
+        // المسح العام
+        window.clearCollection = async (colName) => {
+            if (confirm(`هل أنت متأكد من مسح ${colName}؟`)) {
+                const snap = await getDocs(collection(db, colName));
+                snap.forEach(d => deleteDoc(doc(db, colName, d.id)));
+                alert("تم التنظيف بنجاح!");
+            }
+        };
+
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loginSection').style.display = user ? 'none' : 'block';
             document.getElementById('adminSection').style.display = user ? 'block' : 'none';
         });
 
-        window.loginAdmin = () => {
-            signInWithEmailAndPassword(auth, document.getElementById('emailInput').value, document.getElementById('passwordInput').value)
-                .catch(e => alert(e.message));
-        };
-
         window.logoutAdmin = () => signOut(auth);
-
-        // إضافة مادة جديدة
+        
         window.addSubject = async () => {
-            try {
-                await addDoc(collection(db, "subjects"), {
-                    title: document.getElementById('subjectTitle').value,
-                    desc: document.getElementById('subjectDesc').value,
-                    icon: document.getElementById('subjectIcon').value || "📖",
-                    createdAt: serverTimestamp()
-                });
-                alert('تمت الإضافة بنجاح!');
-            } catch (e) { alert(e.message); }
+            await addDoc(collection(db, "subjects"), {
+                title: document.getElementById('subjectTitle').value,
+                desc: document.getElementById('subjectDesc').value,
+                createdAt: serverTimestamp()
+            });
+            alert('تم الحفظ!');
         };
-
-        // مسح جميع المواد من Firestore
-        document.getElementById('clearBtn').addEventListener('click', async () => {
-            if (confirm("هل أنت متأكد؟ سيتم مسح كافة المواد نهائياً!")) {
-                const querySnapshot = await getDocs(collection(db, "subjects"));
-                querySnapshot.forEach(async (d) => {
-                    await deleteDoc(doc(db, "subjects", d.id));
-                });
-                alert("تم المسح بنجاح! 🧹");
-            }
-        });
     </script>
 </body>
 </html>

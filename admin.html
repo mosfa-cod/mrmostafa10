@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>لوحة التحكم — الأستاذ مصطفى عبد العال دحروج</title>
+  <style>
+    body{font-family:'Tahoma',sans-serif;background:#f4f4f9;margin:0;padding:20px;color:#222}
+    .box{max-width:760px;margin:auto;background:#fff;padding:24px;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+    h2{color:#7c3aed;border-bottom:2px solid #eee;padding-bottom:8px}
+    input,textarea{width:100%;padding:10px;margin:6px 0;border:1px solid #ddd;border-radius:8px;box-sizing:border-box}
+    button{background:#7c3aed;color:#fff;border:none;padding:10px 18px;border-radius:8px;cursor:pointer;margin:4px 0}
+    button.danger{background:#dc2626}
+    .item{border:1px solid #eee;border-radius:8px;padding:10px;margin:8px 0;display:flex;justify-content:space-between;align-items:center}
+    #login{max-width:360px;margin:60px auto}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+
+  <!-- شاشة الدخول -->
+  <div id="login" class="box">
+    <h2>دخول المسؤول</h2>
+    <input id="email" type="email" placeholder="البريد الإلكتروني">
+    <input id="password" type="password" placeholder="كلمة المرور">
+    <button id="loginBtn">تسجيل الدخول</button>
+    <p id="loginMsg" style="color:#dc2626"></p>
+  </div>
+
+  <!-- لوحة التحكم -->
+  <div id="panel" class="hidden">
+    <div class="box">
+      <button id="logoutBtn" class="danger">تسجيل الخروج</button>
+    </div>
+
+    <!-- المواد -->
+    <div class="box">
+      <h2>المواد التعليمية</h2>
+      <input id="s_id" type="hidden">
+      <input id="s_title" placeholder="عنوان المادة">
+      <input id="s_icon" placeholder="الأيقونة (إيموجي مثل 📖)">
+      <textarea id="s_desc" placeholder="وصف قصير"><textarea name="" id=""></textarea>
+      <input id="s_lessons" type="number" placeholder="عدد الدروس">
+      <input id="s_stories" type="number" placeholder="عدد القصص">
+      <input id="s_order" type="number" placeholder="الترتيب">
+      <button id="s_save">حفظ المادة</button>
+      <div id="subjectsList"></div>
+    </div>
+
+    <!-- تحدي اليوم -->
+    <div class="box">
+      <h2>تحدي اليوم</h2>
+      <input id="c_title" placeholder="عنوان التحدي">
+      <textarea id="c_desc" placeholder="نص التحدي">textarea>
+      <input id="c_points" type="number" placeholder="النقاط">
+      <button id="c_save">تحديث التحدي</button>
+    </div>
+
+    <!-- الآراء -->
+    <div class="box">
+      <h2>آراء أولياء الأمور</h2>
+      <input id="t_id" type="hidden">
+      <input id="t_name" placeholder="اسم الشخص">
+      <input id="t_role" placeholder="صلة القرابة / الوظيفة">
+      <textarea id="t_text" placeholder="نص الرأي">textarea>
+      <input id="t_rating" type="number" min="1" max="5" placeholder="التقييم (1-5)">
+      <input id="t_color" placeholder="لون الدائرة (مثل #7c3aed)">
+      <input id="t_order" type="number" placeholder="الترتيب">
+      <button id="t_save">حفظ الرأي</button>
+      <div id="testList"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { db, auth } from "./firebase-config.js";
+    import { signInWithEmailAndPassword, signOut, onAuthStateChanged }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, setDoc }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const $ = (id) => document.getElementById(id);
+
+    // ---- المصادقة ----
+    $("loginBtn").onclick = async () => {
+      try {
+        await signInWithEmailAndPassword(auth, $("email").value, $("password").value);
+      } catch(e){ $("loginMsg").textContent = "بيانات الدخول غير صحيحة"; }
+    };
+    $("logoutBtn").onclick = () => signOut(auth);
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        $("login").classList.add("hidden");
+        $("panel").classList.remove("hidden");
+        loadSubjects(); loadTests();
+      } else {
+        $("login").classList.remove("hidden");
+        $("panel").classList.add("hidden");
+      }
+    });
+
+    // ---- المواد ----
+    async function loadSubjects(){
+      const snap = await getDocs(collection(db,"subjects"));
+      $("subjectsList").innerHTML="";
+      snap.forEach(d=>{
+        const s=d.data();
+        $("subjectsList").innerHTML += `<div class="item"><span>${s.icon||""} ${s.title}</span>
+          <span><button onclick="window.editS('${d.id}', ${JSON.stringify(s).replace(/"/g,'&quot;')})">تعديل</button>
+          <button class="danger" onclick="window.delS('${d.id}')">حذف</button></span></div>`;
+      });
+    }
+    $("s_save").onclick = async () => {
+      const data = {
+        title:$("s_title").value, icon:$("s_icon").value, description:$("s_desc").value,
+        lessonsCount:Number($("s_lessons").value||0), storiesCount:Number($("s_stories").value||0),
+        order:Number($("s_order").value||0)
+      };
+      if($("s_id").value){ await updateDoc(doc(db,"subjects",$("s_id").value), data); }
+      else { await addDoc(collection(db,"subjects"), data); }
+      ["s_id","s_title","s_icon","s_desc","s_lessons","s_stories","s_order"].forEach(i=>$(i).value="");
+      loadSubjects();
+    };
+    window.editS = (id,s)=>{ $("s_id").value=id; $("s_title").value=s.title||""; $("s_icon").value=s.icon||"";
+      $("s_desc").value=s.description||""; $("s_lessons").value=s.lessonsCount||0;
+      $("s_stories").value=s.storiesCount||0; $("s_order").value=s.order||0; };
+    window.delS = async (id)=>{ if(confirm("حذف المادة؟")){ await deleteDoc(doc(db,"subjects",id)); loadSubjects(); } };
+
+    // ---- تحدي اليوم ----
+    $("c_save").onclick = async () => {
+      await setDoc(doc(db,"challenges","today"), {
+        title:$("c_title").value, description:$("c_desc").value,
+        points:Number($("c_points").value||0), active:true
+      });
+      alert("تم تحديث التحدي");
+    };
+
+    // ---- الآراء ----
+    async function loadTests(){
+      const snap = await getDocs(collection(db,"testimonials"));
+      $("testList").innerHTML="";
+      snap.forEach(d=>{
+        const t=d.data();
+        $("testList").innerHTML += `<div class="item"><span>${t.name} — ${t.role||""}</span>
+          <span><button onclick="window.editT('${d.id}', ${JSON.stringify(t).replace(/"/g,'&quot;')})">تعديل</button>
+          <button class="danger" onclick="window.delT('${d.id}')">حذف</button></span></div>`;
+      });
+    }
+    $("t_save").onclick = async () => {
+      const data = {
+        name:$("t_name").value, role:$("t_role").value, text:$("t_text").value,
+        rating:Number($("t_rating").value||5), avatarColor:$("t_color").value||"#7c3aed",
+        order:Number($("t_order").value||0)
+      };
+      if($("t_id").value){ await updateDoc(doc(db,"testimonials",$("t_id").value), data); }
+      else { await addDoc(collection(db,"testimonials"), data); }
+      ["t_id","t_name","t_role","t_text","t_rating","t_color","t_order"].forEach(i=>$(i).value="");
+      loadTests();
+    };
+    window.editT = (id,t)=>{ $("t_id").value=id; $("t_name").value=t.name||""; $("t_role").value=t.role||"";
+      $("t_text").value=t.text||""; $("t_rating").value=t.rating||5; $("t_color").value=t.avatarColor||"";
+      $("t_order").value=t.order||0; };
+    window.delT = async (id)=>{ if(confirm("حذف الرأي؟")){ await deleteDoc(doc(db,"testimonials",id)); loadTests(); } };
+  </script>
+</body>
+</html>

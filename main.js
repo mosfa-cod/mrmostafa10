@@ -1,6 +1,6 @@
  // main.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, getDoc, query, orderBy } 
+import { getFirestore, collection, getDocs, doc, getDoc, query } 
   from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -21,21 +21,24 @@ function renderStars(rating) {
   return stars;
 }
 
-// 1) جلب المواد التعليمية
+// 1) جلب المواد التعليمية (تم إزالة orderBy للتأكد من ظهور البيانات)
 async function loadSubjects() {
   const grid = document.getElementById("subjects-grid");
   if (!grid) return;
   try {
-    const q = query(collection(db, "subjects"), orderBy("order", "asc"));
+    const q = query(collection(db, "subjects")); // استعلام بدون ترتيب
     const snap = await getDocs(q);
+    
+    console.log("عدد المواد الموجودة في قاعدة البيانات:", snap.size);
+    
     grid.innerHTML = "";
     snap.forEach((docSnap) => {
       const s = docSnap.data();
       grid.innerHTML += `
         <div class="subject-card">
           <div class="subject-icon">${s.icon || "📚"}</div>
-          <h3 class="subject-title">${s.title}</h3>
-          <p>${s.description || ""}</p>
+          <h3 class="subject-title">${s.title || "بدون عنوان"}</h3>
+          <p>${s.desc || s.description || ""}</p>
           <div class="subject-stats">
             <span>📖 ${s.lessonsCount ?? 0} درس</span>
             <span>📕 ${s.storiesCount ?? 0} قصة</span>
@@ -67,7 +70,7 @@ async function loadTestimonials() {
   const grid = document.getElementById("testimonials-grid");
   if (!grid) return;
   try {
-    const q = query(collection(db, "testimonials"), orderBy("order", "asc"));
+    const q = query(collection(db, "testimonials")); // استعلام بدون ترتيب
     const snap = await getDocs(q);
     grid.innerHTML = "";
     snap.forEach((docSnap) => {
@@ -89,22 +92,16 @@ async function loadTestimonials() {
   } catch (e) { console.error("خطأ في جلب الآراء:", e); }
 }
 
-// ===== الوضع الداكن + ثيمات الألوان =====
-const root = document.documentElement;
-const savedMode = localStorage.getItem("siteMode") || "light";
-const savedTheme = localStorage.getItem("siteTheme") || "purple";
-root.setAttribute("data-mode", savedMode);
-root.setAttribute("data-theme", savedTheme);
-
-// تشغيل كل شيء عند تحميل الصفحة
+// ===== تشغيل الكود =====
 document.addEventListener("DOMContentLoaded", () => {
   loadSubjects();
   loadChallenge();
   loadTestimonials();
 
+  // تحكم الثيم
+  const root = document.documentElement;
   const toggle = document.getElementById("modeToggle");
   if (toggle) {
-    toggle.textContent = savedMode === "dark" ? "☀️" : "🌙";
     toggle.addEventListener("click", () => {
       const newMode = root.getAttribute("data-mode") === "dark" ? "light" : "dark";
       root.setAttribute("data-mode", newMode);
@@ -112,12 +109,4 @@ document.addEventListener("DOMContentLoaded", () => {
       toggle.textContent = newMode === "dark" ? "☀️" : "🌙";
     });
   }
-
-  document.querySelectorAll(".color-dot").forEach(dot => {
-    dot.addEventListener("click", () => {
-      const theme = dot.getAttribute("data-theme");
-      root.setAttribute("data-theme", theme);
-      localStorage.setItem("siteTheme", theme);
-    });
-  });
 });

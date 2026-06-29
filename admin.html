@@ -6,12 +6,11 @@
     <style>
         body { font-family: sans-serif; padding: 20px; background: #f4f6f9; }
         .card { background: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
-        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
         button { width: 100%; padding: 10px; background: #6366f1; color: white; border: none; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="card" id="loginSection">
         <h2>دخول المسؤول</h2>
         <input type="email" id="emailInput" placeholder="البريد الإلكتروني">
@@ -30,8 +29,8 @@
 
     <script type="module">
         import { auth, db } from './firebase-config.js';
-        import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
         onAuthStateChanged(auth, (user) => {
             document.getElementById('loginSection').style.display = user ? 'none' : 'block';

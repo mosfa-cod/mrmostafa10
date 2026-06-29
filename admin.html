@@ -2,148 +2,79 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة التحكم - الأستاذ مصطفى</title>
-    <!-- استدعاء مكتبات الفايربيس الكلاسيكية المستقرة -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-    <!-- استدعاء ملف الإعدادات الخاص بك -->
-    <script src="firebase-config.js"></script>
+    <title>لوحة تحكم الأستاذ مصطفى</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .login-card, .admin-panel { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; }
-        .admin-panel { max-width: 800px; display: none; text-align: right; }
-        h2 { color: #6366f1; margin-bottom: 25px; text-align: center; }
-        input, textarea, select { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background-color: #6366f1; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        button:hover { background-color: #4f46e5; }
-        .section-box { border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; margin-bottom: 25px; background: #fafafa; }
-        .logout-btn { background-color: #ef4444; margin-top: 20px; }
-        .logout-btn:hover { background-color: #dc2626; }
+        body { font-family: sans-serif; padding: 20px; background: #f4f6f9; }
+        .card { background: white; padding: 20px; border-radius: 10px; max-width: 500px; margin: auto; }
+        input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #6366f1; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        .danger-zone { border: 1px solid #ef4444; background: #fef2f2; padding: 15px; margin-top: 20px; border-radius: 10px; }
     </style>
 </head>
 <body>
-
-    <!-- 1️⃣ نموذج تسجيل الدخول للمسؤول -->
-    <div class="login-card" id="loginSection">
+    <div class="card" id="loginSection">
         <h2>دخول المسؤول</h2>
         <input type="email" id="emailInput" placeholder="البريد الإلكتروني">
         <input type="password" id="passwordInput" placeholder="كلمة المرور">
         <button onclick="loginAdmin()">تسجيل الدخول</button>
     </div>
 
-    <!-- 2️⃣ لوحة التحكم الكاملة (تظهر بعد تسجيل الدخول بنجاح) -->
-    <div class="admin-panel" id="adminSection">
-        <h2>لوحة تحكم الأستاذ مصطفى 🛠️</h2>
-        
-        <!-- قسم إضافة مادة تعليمية جديدة -->
-        <div class="section-box">
-            <h3>إضافة مادة تعليمية جديدة</h3>
-            <input type="text" id="subjectTitle" placeholder="اسم المادة (مثال: اللغة العربية)">
-            <textarea id="subjectDesc" rows="3" placeholder="وصف مختصر للمادة"></textarea>
-            <input type="text" id="subjectIcon" placeholder="أيقونة المادة (مثال: 📚 أو 🔢)">
-            <button onclick="addSubject()">إضافة المادة للموقع</button>
+    <div class="card" id="adminSection" style="display: none;">
+        <h2>لوحة التحكم 🛠️</h2>
+        <input type="text" id="subjectTitle" placeholder="اسم المادة">
+        <textarea id="subjectDesc" placeholder="وصف المادة"></textarea>
+        <input type="text" id="subjectIcon" placeholder="الأيقونة">
+        <button onclick="addSubject()">حفظ المادة</button>
+
+        <div class="danger-zone">
+            <h3 style="color: #ef4444; margin-top: 0;">تنظيف الموقع</h3>
+            <button id="clearBtn" style="background-color: #dc2626;">مسح كل المواد الحالية 🗑️</button>
         </div>
 
-        <!-- قسم تحديث تحدي اليوم -->
-        <div class="section-box">
-            <h3>تحديث تحدي اليوم</h3>
-            <input type="text" id="challengeTitle" placeholder="عنوان التحدي">
-            <textarea id="challengeDesc" rows="3" placeholder="تفاصيل التحدي المطلوب من الطلاب"></textarea>
-            <button onclick="updateChallenge()">تحديث التحدي الآن</button>
-        </div>
-
-        <!-- قسم تنظيف الموقع من المواد القديمة والتجريبية -->
-        <div class="section-box" style="border-color: #ef4444; background: #fef2f2;">
-            <h3 style="color: #ef4444;">تنظيف الموقع (حذف التجارب)</h3>
-            <p style="color: #666; font-size: 14px;">اضغط على الزر بالأسفل لمسح كافة المواد التعليمية القديمة والتجريبية من الموقع دفعة واحدة.</p>
-            <button onclick="clearAllSubjects()" style="background-color: #dc2626;">مسح كل المواد الحالية 🗑️</button>
-        </div>
-
-        <button class="logout-btn" onclick="logoutAdmin()">تسجيل الخروج</button>
+        <button style="background: #6b7280; margin-top: 10px;" onclick="logoutAdmin()">تسجيل الخروج</button>
     </div>
 
-    <script>
-        // دالة تسجيل الدخول باستخدام Firebase Auth
-        function loginAdmin() {
-            var email = document.getElementById('emailInput').value;
-            var password = document.getElementById('passwordInput').value;
-            
-            firebase.auth().signInWithEmailAndPassword(email, password)
-                .then(function(userCredential) {
-                    alert('تم تسجيل الدخول بنجاح!');
-                })
-                .catch(function(error) {
-                    alert('خطأ في البيانات: ' + error.message);
-                });
-        }
+    <script type="module">
+        import { auth, db } from './firebase-config.js';
+        import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+        import { collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
-        // مراقبة حالة المستخدم (هل هو مسجل دخول أم لا)
-        firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                document.getElementById('loginSection').style.display = 'none';
-                document.getElementById('adminSection').style.display = 'block';
-            } else {
-                document.getElementById('loginSection').style.display = 'block';
-                document.getElementById('adminSection').style.display = 'none';
-            }
+        // التحكم في ظهور الأقسام
+        onAuthStateChanged(auth, (user) => {
+            document.getElementById('loginSection').style.display = user ? 'none' : 'block';
+            document.getElementById('adminSection').style.display = user ? 'block' : 'none';
         });
 
-        // دالة تسجيل الخروج
-        function logoutAdmin() {
-            firebase.auth().signOut();
-        }
+        window.loginAdmin = () => {
+            signInWithEmailAndPassword(auth, document.getElementById('emailInput').value, document.getElementById('passwordInput').value)
+                .catch(e => alert(e.message));
+        };
 
-        // دالة إضافة مادة إلى الفايربيس
-        function addSubject() {
-            var title = document.getElementById('subjectTitle').value;
-            var desc = document.getElementById('subjectDesc').value;
-            var icon = document.getElementById('subjectIcon').value;
+        window.logoutAdmin = () => signOut(auth);
 
-            if(!title || !desc) return alert('برجاء ملء الحقول المطلوبة');
+        // إضافة مادة جديدة
+        window.addSubject = async () => {
+            try {
+                await addDoc(collection(db, "subjects"), {
+                    title: document.getElementById('subjectTitle').value,
+                    desc: document.getElementById('subjectDesc').value,
+                    icon: document.getElementById('subjectIcon').value || "📖",
+                    createdAt: serverTimestamp()
+                });
+                alert('تمت الإضافة بنجاح!');
+            } catch (e) { alert(e.message); }
+        };
 
-            firebase.database().ref('content/subjects').push({
-                title: title,
-                desc: desc,
-                icon: icon || "📖"
-            }).then(function() {
-                alert('تم إضافة المادة بنجاح للموقع الحقيقي!');
-                document.getElementById('subjectTitle').value = '';
-                document.getElementById('subjectDesc').value = '';
-                document.getElementById('subjectIcon').value = '';
-            });
-        }
-
-        // دالة تحديث تحدي اليوم في الفايربيس
-        function updateChallenge() {
-            var title = document.getElementById('challengeTitle').value;
-            var desc = document.getElementById('challengeDesc').value;
-
-            if(!title || !desc) return alert('برجاء ملء الحقول المطلوبة');
-
-            firebase.database().ref('content/challenge').set({
-                title: title,
-                desc: desc
-            }).then(function() {
-                alert('تم تحديث تحدي اليوم بنجاح!');
-                document.getElementById('challengeTitle').value = '';
-                document.getElementById('challengeDesc').value = '';
-            });
-        }
-
-        // دالة مسح كل المواد وتصفية الموقع من التجارب القديمة
-        function clearAllSubjects() {
-            if (confirm("هل أنت متأكد تماماً من حذف كل المواد التعليمية؟ لا يمكن التراجع عن هذا الإجراء.")) {
-                firebase.database().ref('content/subjects').remove()
-                    .then(function() {
-                        alert("Done! Website cleared successfully. 🧹");
-                    })
-                    .catch(function(error) {
-                        alert("Error: " + error.message);
-                    });
+        // مسح جميع المواد من Firestore
+        document.getElementById('clearBtn').addEventListener('click', async () => {
+            if (confirm("هل أنت متأكد؟ سيتم مسح كافة المواد نهائياً!")) {
+                const querySnapshot = await getDocs(collection(db, "subjects"));
+                querySnapshot.forEach(async (d) => {
+                    await deleteDoc(doc(db, "subjects", d.id));
+                });
+                alert("تم المسح بنجاح! 🧹");
             }
-        }
+        });
     </script>
 </body>
 </html>

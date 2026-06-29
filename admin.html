@@ -24,6 +24,27 @@
         <textarea id="subjectDesc" placeholder="وصف المادة"></textarea>
         <input type="text" id="subjectIcon" placeholder="الأيقونة">
         <button onclick="addSubject()">حفظ المادة</button>
+     <!-- زر تنظيف البيانات التجريبية --> <div class="section-box" style="border-color: #ef4444; background: #fef2f2;">
+    <h3 style="color: #ef4444;">تنظيف الموقع (حذف التجارب)</h3>
+    <p style="color: #666; font-size: 14px;">اضغط على الزر بالأسفل لمسح كافة المواد التعليمية القديمة والتجريبية من الموقع دفعة واحدة.</p>
+    <button onclick="clearAllSubjects()" style="background-color: #dc2626;">مسح كل المواد الحالية 🗑️</button>
+</div>
+
+<script>
+function clearAllSubjects() {
+    if (confirm("Are you sure you want to delete all subjects?")) {
+        firebase.database().ref('content/subjects').remove()
+            .then(function() {
+                alert("Done! Website cleared successfully. 🧹");
+            })
+            .catch(function(error) {
+                alert("Error: " + error.message);
+            });
+    }
+}
+</script>
+
+
         <button style="background: red; margin-top: 10px;" onclick="logoutAdmin()">تسجيل الخروج</button>
     </div>
 

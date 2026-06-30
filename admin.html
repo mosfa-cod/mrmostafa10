@@ -12,49 +12,32 @@
         <button id="loginBtn">تسجيل الدخول</button>
     </div>
 
-    <!-- ... (بقية الأقسام) ... -->
- <script type="module">
-import { auth, db } from './firebase-config.js';
-import { 
-  signInWithEmailAndPassword, 
-  onAuthStateChanged 
-} from "https://gstatic.com";
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  deleteDoc, 
-  doc 
-} from "https://gstatic.com";
+    <!-- ... (بقية الأقسام) ... --> <!-- استدعاء مكتبات Firebase بالطريقة التقليدية المتوافقة مع المتصفحات -->
+<script src="https://gstatic.com"></script>
+<script src="https://gstatic.com"></script>
 
-
-
-
-    // تفعيل عمل الزر بشكل صحيح دون إعادة تحميل الصفحة
+<script>
+    // استخدام الإعدادات الموجودة في ملفك القديم
+    // تأكد أن ملف firebase-config.js يرفع المتغيرات على الـ window أو قم بنسخ الـ firebaseConfig هنا مباشرة إذا استمر الخطأ
+    
     document.getElementById('loginBtn').addEventListener('click', (e) => {
-        e.preventDefault(); // منع الصفحة من التحديث التلقائي واختفاء الأخطاء
+        e.preventDefault(); 
         const email = document.getElementById('emailInput').value;
         const pass = document.getElementById('passwordInput').value;
 
-        signInWithEmailAndPassword(auth, email, pass)
+        // طريقة تسجيل الدخول المتوافقة والسهلة
+        firebase.auth().signInWithEmailAndPassword(email, pass)
             .then((userCredential) => {
                 alert("تم تسجيل الدخول بنجاح!");
+                // هنا يظهر محتوى لوحة التحكم
+                document.getElementById('loginSection').style.display = 'block';
             })
             .catch((error) => {
                 alert("خطأ في تسجيل الدخول: " + error.message);
             });
     });
-
-    // تعديل الشرط لتبديل الواجهات بدلاً من إخفاء الصفحة بالكامل
-    onAuthStateChanged(auth, (user) => {
-        if (user) {
-            // هنا تكتب كود إظهار لوحة التحكم بعد تسجيل الدخول بنجاح
-            document.getElementById('loginSection').style.display = 'block'; 
-        } else {
-            document.getElementById('loginSection').style.display = 'block';
-        }
-    });
 </script>
+
 
 </body>
 </html>
